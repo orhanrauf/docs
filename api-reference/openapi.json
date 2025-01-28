@@ -1,94 +1,29 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+    "title": "Airweave",
+    "version": "0.1.0"
   },
-  "servers": [
-    {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
   "paths": {
-    "/plants": {
+    "/health": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
+        "tags": [
+          "health"
         ],
+        "summary": "Health Check",
+        "description": "Check if the API is healthy.\n\nReturns:\n    dict: A dictionary containing the status of the API.",
+        "operationId": "health_check_health_get",
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Check Health Get"
                 }
               }
             }
@@ -96,32 +31,2394 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/api_keys/": {
+      "post": {
+        "tags": [
+          "api_keys"
+        ],
+        "summary": "Create Api Key",
+        "description": "Create a new API key for the current user.\n\nReturns a temporary plain key for the user to store securely.\nThis is not stored in the database.\n\nArgs:\n----\n    db (AsyncSession): The database session.\n    api_key_in (schemas.APIKeyCreate): The API key creation data.\n    user (schemas.User): The current user.\n\nReturns:\n-------\n    schemas.APIKeyWithPlainKey: The created API key object, including the key.",
+        "operationId": "create_api_key_api_keys__post",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/APIKeyCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIKeyWithPlainKey"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "api_keys"
+        ],
+        "summary": "Read Api Keys",
+        "description": "Retrieve all API keys for the current user.\n\nArgs:\n----\n    db (AsyncSession): The database session.\n    skip (int): Number of records to skip for pagination.\n    limit (int): Maximum number of records to return.\n    user (schemas.User): The current user.\n\nReturns:\n-------\n    List[schemas.APIKey]: A list of API keys.",
+        "operationId": "read_api_keys_api_keys__get",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
-              "format": "int64"
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/APIKey"
+                  },
+                  "title": "Response Read Api Keys Api Keys  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "api_keys"
+        ],
+        "summary": "Delete Api Key",
+        "description": "Delete an API key.\n\nArgs:\n----\n    db (AsyncSession): The database session.\n    id (UUID): The ID of the API key.\n    user (schemas.User): The current user.\n\nReturns:\n-------\n    schemas.APIKey: The revoked API key object.\n\nRaises:\n------\n    HTTPException: If the API key is not found.",
+        "operationId": "delete_api_key_api_keys__delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIKey"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api_keys/{id}": {
+      "get": {
+        "tags": [
+          "api_keys"
+        ],
+        "summary": "Read Api Key",
+        "description": "Retrieve an API key by ID.\n\nArgs:\n----\n    db (AsyncSession): The database session.\n    id (UUID): The ID of the API key.\n    user (schemas.User): The current user.\n\nReturns:\n-------\n    schemas.APIKey: The API key object.\n\nRaises:\n------\n    HTTPException: If the API key is not found.",
+        "operationId": "read_api_key_api_keys__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIKey"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Read User",
+        "description": "Get current user.\n\nArgs:\n----\n    current_user (User): The current user.\n\nReturns:\n-------\n    schemas.User: The user object.",
+        "operationId": "read_user_users__get",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sources/detail/{short_name}": {
+      "get": {
+        "tags": [
+          "sources"
+        ],
+        "summary": "Read Source",
+        "description": "Get source by id.\n\nArgs:\n----\n    db (AsyncSession): The database session.\n    short_name (str): The short name of the source.\n    user (schemas.User): The current user.\n\nReturns:\n-------\n    schemas.Source: The source object.",
+        "operationId": "read_source_sources_detail__short_name__get",
+        "parameters": [
+          {
+            "name": "short_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Short Name"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Source"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sources/list": {
+      "get": {
+        "tags": [
+          "sources"
+        ],
+        "summary": "Read Sources",
+        "description": "Get all sources for the current user.\n\nReturns:\n-------\n    list[schemas.Source]: The list of sources.",
+        "operationId": "read_sources_sources_list_get",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Source"
+                  },
+                  "title": "Response Read Sources Sources List Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/destinations/list": {
+      "get": {
+        "tags": [
+          "destinations"
+        ],
+        "summary": "List Destinations",
+        "description": "Get all available destinations.",
+        "operationId": "list_destinations_destinations_list_get",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Destination"
+                  },
+                  "title": "Response List Destinations Destinations List Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/destinations/detail/{short_name}": {
+      "get": {
+        "tags": [
+          "destinations"
+        ],
+        "summary": "Read Destination",
+        "description": "Get destination by short name.",
+        "operationId": "read_destination_destinations_detail__short_name__get",
+        "parameters": [
+          {
+            "name": "short_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Short Name"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DestinationWithConfigFields"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/embedding_models/detail/{short_name}": {
+      "get": {
+        "tags": [
+          "embedding_models"
+        ],
+        "summary": "Read Embedding Model",
+        "description": "Get embedding model by id.\n\nArgs:\n----\n    db (AsyncSession): The database session.\n    short_name (str): The short name of the embedding model.\n    user (schemas.User): The current user.\n\nReturns:\n-------\n    schemas.EmbeddingModel: The embedding model object.",
+        "operationId": "read_embedding_model_embedding_models_detail__short_name__get",
+        "parameters": [
+          {
+            "name": "short_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Short Name"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmbeddingModelWithConfigFields"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/embedding_models/list": {
+      "get": {
+        "tags": [
+          "embedding_models"
+        ],
+        "summary": "Read Embedding Models",
+        "description": "Get all embedding models.\n\nArgs:\n----\n    db (AsyncSession): The database session.\n    user (schemas.User): The current user.\n\nReturns:\n-------\n    list[schemas.EmbeddingModel]: The list of embedding models.",
+        "operationId": "read_embedding_models_embedding_models_list_get",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EmbeddingModel"
+                  },
+                  "title": "Response Read Embedding Models Embedding Models List Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/detail/{connection_id}": {
+      "get": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "Get Connection",
+        "description": "Get a specific connection.",
+        "operationId": "get_connection_connections_detail__connection_id__get",
+        "parameters": [
+          {
+            "name": "connection_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Connection Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/list": {
+      "get": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "List All Connected Integrations",
+        "description": "Get all active connections for the current user across all integration types.",
+        "operationId": "list_all_connected_integrations_connections_list_get",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Connection"
+                  },
+                  "title": "Response List All Connected Integrations Connections List Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/list/{integration_type}": {
+      "get": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "List Connected Integrations",
+        "description": "Get all integrations of specified type connected to the current user.\n\nArgs:\n    integration_type (IntegrationType): The type of integration to get connections for.\n    db (AsyncSession): The database session.\n    user (schemas.User): The current user.\n\nReturns:\n    list[schemas.Connection]: The list of connections.",
+        "operationId": "list_connected_integrations_connections_list__integration_type__get",
+        "parameters": [
+          {
+            "name": "integration_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/IntegrationType"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Connection"
+                  },
+                  "title": "Response List Connected Integrations Connections List  Integration Type  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/connect/{integration_type}/{short_name}": {
+      "post": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "Connect Integration",
+        "description": "Connect to a source, destination, or embedding model.\n\nExpects a POST body with:\n```json\n{\n    \"name\": \"required connection name\",\n    ... other config fields specific to the integration type ...\n}\n```",
+        "operationId": "connect_integration_connections_connect__integration_type___short_name__post",
+        "parameters": [
+          {
+            "name": "integration_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/IntegrationType"
+            }
+          },
+          {
+            "name": "short_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Short Name"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_connect_integration_connections_connect__integration_type___short_name__post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/credentials/{connection_id}": {
+      "get": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "Get Connection Credentials",
+        "description": "Get the credentials for a connection.\n\nArgs:\n    connection_id (UUID): The ID of the connection to get credentials for\n    db (AsyncSession): The database session\n    user (schemas.User): The current user\n\nReturns:\n    dict: The credentials for the connection",
+        "operationId": "get_connection_credentials_connections_credentials__connection_id__get",
+        "parameters": [
+          {
+            "name": "connection_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Connection Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Get Connection Credentials Connections Credentials  Connection Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/delete/source/{connection_id}": {
+      "delete": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "Delete Connection",
+        "description": "Delete a connection.\n\nDeletes the connection and integration credential.\n\nArgs:\n    db (AsyncSession): The database session\n    connection_id (UUID): The ID of the connection to delete\n    delete_syncs_and_data (bool): Whether to delete the associated syncs and data\n    user (schemas.User): The current user\n\nReturns:\n    schemas.Connection: The deleted connection",
+        "operationId": "delete_connection_connections_delete_source__connection_id__delete",
+        "parameters": [
+          {
+            "name": "connection_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Connection Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/disconnect/source/{connection_id}": {
+      "put": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "Disconnect Source Connection",
+        "description": "Disconnect from a source connection.\n\nArgs:\n    db (AsyncSession): The database session\n    connection_id (UUID): The ID of the connection to disconnect\n    user (schemas.User): The current user\nReturns:\n    schemas.Connection: The disconnected connection",
+        "operationId": "disconnect_source_connection_connections_disconnect_source__connection_id__put",
+        "parameters": [
+          {
+            "name": "connection_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Connection Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/disconnect/destination/{connection_id}": {
+      "put": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "Disconnect Destination Connection",
+        "description": "Disconnect from a destination connection.\n\nArgs:\n    db (AsyncSession): The database session\n    connection_id (UUID): The ID of the connection to disconnect\n    user (schemas.User): The current user\n\nReturns:\n    schemas.Connection: The disconnected connection",
+        "operationId": "disconnect_destination_connection_connections_disconnect_destination__connection_id__put",
+        "parameters": [
+          {
+            "name": "connection_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Connection Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/oauth2/source/auth_url": {
+      "get": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "Get Oauth2 Auth Url",
+        "description": "Get the OAuth2 authorization URL for a source.",
+        "operationId": "get_oauth2_auth_url_connections_oauth2_source_auth_url_get",
+        "parameters": [
+          {
+            "name": "short_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Short Name"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "title": "Response Get Oauth2 Auth Url Connections Oauth2 Source Auth Url Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/oauth2/source/code": {
+      "post": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "Send Oauth2 Code",
+        "description": "Send the OAuth2 authorization code for a source.\n\nThis will:\n1. Get the OAuth2 settings for the source\n2. Exchange the authorization code for a token\n3. Create an integration credential with the token",
+        "operationId": "send_oauth2_code_connections_oauth2_source_code_post",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_send_oauth2_code_connections_oauth2_source_code_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/oauth2/white-label/{white_label_id}/code": {
+      "post": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "Send Oauth2 White Label Code",
+        "description": "Exchange the OAuth2 authorization code for a white label integration.",
+        "operationId": "send_oauth2_white_label_code_connections_oauth2_white_label__white_label_id__code_post",
+        "parameters": [
+          {
+            "name": "white_label_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "White Label Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "title": "Code"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connections/oauth2/white-label/{white_label_id}/auth_url": {
+      "get": {
+        "tags": [
+          "connections"
+        ],
+        "summary": "Get Oauth2 White Label Auth Url",
+        "description": "Get the OAuth2 authorization URL for a white label integration.",
+        "operationId": "get_oauth2_white_label_auth_url_connections_oauth2_white_label__white_label_id__auth_url_get",
+        "parameters": [
+          {
+            "name": "white_label_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "White Label Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "title": "Response Get Oauth2 White Label Auth Url Connections Oauth2 White Label  White Label Id  Auth Url Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "List Syncs",
+        "description": "List all syncs for the current user.",
+        "operationId": "list_syncs_sync__get",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Sync"
+                  },
+                  "title": "Response List Syncs Sync  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Create Sync",
+        "description": "Create a new sync configuration.",
+        "operationId": "create_sync_sync__post",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sync"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/{sync_id}": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Get Sync",
+        "description": "Get a specific sync by ID.",
+        "operationId": "get_sync_sync__sync_id__get",
+        "parameters": [
+          {
+            "name": "sync_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Sync Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sync"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Delete Sync",
+        "description": "Delete a sync configuration and optionally its associated data.",
+        "operationId": "delete_sync_sync__sync_id__delete",
+        "parameters": [
+          {
+            "name": "sync_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Sync Id"
+            }
+          },
+          {
+            "name": "delete_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Delete Data"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sync"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/{sync_id}/run": {
+      "post": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Run Sync",
+        "description": "Trigger a sync run.",
+        "operationId": "run_sync_sync__sync_id__run_post",
+        "parameters": [
+          {
+            "name": "sync_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Sync Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/{sync_id}/jobs": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "List Sync Jobs",
+        "description": "List all jobs for a specific sync.",
+        "operationId": "list_sync_jobs_sync__sync_id__jobs_get",
+        "parameters": [
+          {
+            "name": "sync_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Sync Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SyncJob"
+                  },
+                  "title": "Response List Sync Jobs Sync  Sync Id  Jobs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/job/{job_id}": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Get Sync Job",
+        "description": "Get details of a specific sync job.",
+        "operationId": "get_sync_job_sync_job__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "sync_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Sync Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/job/{job_id}/subscribe": {
+      "get": {
+        "tags": [
+          "sync"
+        ],
+        "summary": "Subscribe Sync Job",
+        "description": "Server-Sent Events (SSE) endpoint to subscribe to a sync job's progress.",
+        "operationId": "subscribe_sync_job_sync_job__job_id__subscribe_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/white_labels/list": {
+      "get": {
+        "tags": [
+          "white_labels"
+        ],
+        "summary": "List White Labels",
+        "description": "List all white labels for the current user's organization.",
+        "operationId": "list_white_labels_white_labels_list_get",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WhiteLabel"
+                  },
+                  "title": "Response List White Labels White Labels List Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/white_labels/": {
+      "post": {
+        "tags": [
+          "white_labels"
+        ],
+        "summary": "Create White Label",
+        "description": "Create new white label integration.",
+        "operationId": "create_white_label_white_labels__post",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WhiteLabelCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhiteLabel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/white_labels/{white_label_id}": {
+      "get": {
+        "tags": [
+          "white_labels"
+        ],
+        "summary": "Get White Label",
+        "description": "Get a specific white label integration.",
+        "operationId": "get_white_label_white_labels__white_label_id__get",
+        "parameters": [
+          {
+            "name": "white_label_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "White Label Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhiteLabel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "white_labels"
+        ],
+        "summary": "Update White Label",
+        "description": "Update a white label integration.",
+        "operationId": "update_white_label_white_labels__white_label_id__put",
+        "parameters": [
+          {
+            "name": "white_label_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "White Label Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WhiteLabelUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhiteLabel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "white_labels"
+        ],
+        "summary": "Delete White Label",
+        "description": "Delete a white label integration.",
+        "operationId": "delete_white_label_white_labels__white_label_id__delete",
+        "parameters": [
+          {
+            "name": "white_label_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "White Label Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhiteLabel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/white_labels/{white_label_id}/oauth2/auth_url": {
+      "get": {
+        "tags": [
+          "white_labels"
+        ],
+        "summary": "Get White Label Oauth2 Auth Url",
+        "description": "Generate the OAuth2 authorization URL by delegating to oauth2_service.",
+        "operationId": "get_white_label_oauth2_auth_url_white_labels__white_label_id__oauth2_auth_url_get",
+        "parameters": [
+          {
+            "name": "white_label_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "White Label Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "title": "Response Get White Label Oauth2 Auth Url White Labels  White Label Id  Oauth2 Auth Url Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/white_labels/{white_label_id}/oauth2/code": {
+      "post": {
+        "tags": [
+          "white_labels"
+        ],
+        "summary": "Exchange White Label Oauth2 Code",
+        "description": "Exchange OAuth2 code for tokens and create connection.",
+        "operationId": "exchange_white_label_oauth2_code_white_labels__white_label_id__oauth2_code_post",
+        "parameters": [
+          {
+            "name": "white_label_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "White Label Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "title": "Code"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/white_labels/{white_label_id}/syncs": {
+      "get": {
+        "tags": [
+          "white_labels"
+        ],
+        "summary": "List White Label Syncs",
+        "description": "List all syncs for a specific white label.",
+        "operationId": "list_white_label_syncs_white_labels__white_label_id__syncs_get",
+        "parameters": [
+          {
+            "name": "white_label_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "White Label Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Sync"
+                  },
+                  "title": "Response List White Label Syncs White Labels  White Label Id  Syncs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -132,63 +2429,1466 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "APIKey": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix"
+          },
+          "organization": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          },
+          "last_used_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used Date"
+          },
+          "expiration_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiration Date"
+          },
+          "created_by_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Created By Email"
+          },
+          "modified_by_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Modified By Email"
+          }
+        },
         "type": "object",
+        "required": [
+          "id",
+          "key_prefix",
+          "organization",
+          "created_at",
+          "modified_at",
+          "last_used_date",
+          "expiration_date",
+          "created_by_email",
+          "modified_by_email"
+        ],
+        "title": "APIKey",
+        "description": "Schema for APIKey."
+      },
+      "APIKeyCreate": {
+        "properties": {
+          "expiration_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiration Date"
+          }
+        },
+        "type": "object",
+        "title": "APIKeyCreate",
+        "description": "Schema for creating an APIKey object."
+      },
+      "APIKeyWithPlainKey": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix"
+          },
+          "organization": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          },
+          "last_used_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used Date"
+          },
+          "expiration_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiration Date"
+          },
+          "created_by_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Created By Email"
+          },
+          "modified_by_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Modified By Email"
+          },
+          "plain_key": {
+            "type": "string",
+            "title": "Plain Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "key_prefix",
+          "organization",
+          "created_at",
+          "modified_at",
+          "last_used_date",
+          "expiration_date",
+          "created_by_email",
+          "modified_by_email",
+          "plain_key"
+        ],
+        "title": "APIKeyWithPlainKey",
+        "description": "Schema for APIKey with plain key."
+      },
+      "AuthType": {
+        "type": "string",
+        "enum": [
+          "oauth2",
+          "oauth2_with_refresh",
+          "oauth2_with_refresh_rotating",
+          "trello_auth",
+          "api_key",
+          "native_functionality",
+          "config_class"
+        ],
+        "title": "AuthType",
+        "description": "Enumeration of supported authentication types.\n\nAttributes:\n----------\n    oauth2: OAuth2 authentication.\n    oauth2_with_refresh: OAuth2 authentication with refresh token.\n    oauth2_with_refresh_rotating: OAuth2 authentication with rotating refresh token.\n    trello_auth: Trello authentication.\n    api_key: API key authentication.\n    native_functionality: Native functionality.\n    url_and_api_key: URL and API key authentication."
+      },
+      "Body_connect_integration_connections_connect__integration_type___short_name__post": {
         "properties": {
           "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
+            ],
+            "title": "Name"
           },
-          "message": {
-            "type": "string"
+          "config_fields": {
+            "type": "object",
+            "title": "Config Fields",
+            "exclude": [
+              "name"
+            ]
           }
-        }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
+        },
+        "type": "object",
+        "required": [
+          "config_fields"
+        ],
+        "title": "Body_connect_integration_connections_connect__integration_type___short_name__post"
+      },
+      "Body_send_oauth2_code_connections_oauth2_source_code_post": {
+        "properties": {
+          "short_name": {
+            "type": "string",
+            "title": "Short Name"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "short_name",
+          "code"
+        ],
+        "title": "Body_send_oauth2_code_connections_oauth2_source_code_post"
+      },
+      "ConfigField": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "title",
+          "type"
+        ],
+        "title": "ConfigField",
+        "description": "Config field model."
+      },
+      "Connection": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "integration_type": {
+            "$ref": "#/components/schemas/IntegrationType"
+          },
+          "integration_credential_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Integration Credential Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ConnectionStatus"
+          },
+          "short_name": {
+            "type": "string",
+            "title": "Short Name"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "created_by_email": {
+            "type": "string",
+            "title": "Created By Email"
+          },
+          "modified_by_email": {
+            "type": "string",
+            "title": "Modified By Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "integration_type",
+          "integration_credential_id",
+          "status",
+          "short_name",
+          "id",
+          "organization_id",
+          "created_by_email",
+          "modified_by_email"
+        ],
+        "title": "Connection",
+        "description": "Schema for connection with config fields."
+      },
+      "ConnectionStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "inactive",
+          "error"
+        ],
+        "title": "ConnectionStatus",
+        "description": "Connection status enum."
+      },
+      "Destination": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "short_name": {
+            "type": "string",
+            "title": "Short Name"
+          },
+          "class_name": {
+            "type": "string",
+            "title": "Class Name"
+          },
+          "auth_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "auth_config_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auth Config Class"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "short_name",
+          "class_name",
+          "id",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "Destination",
+        "description": "Schema for Destination."
+      },
+      "DestinationWithConfigFields": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "short_name": {
+            "type": "string",
+            "title": "Short Name"
+          },
+          "class_name": {
+            "type": "string",
+            "title": "Class Name"
+          },
+          "auth_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "auth_config_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auth Config Class"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          },
+          "config_fields": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Fields"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "short_name",
+          "class_name",
+          "id",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "DestinationWithConfigFields",
+        "description": "Schema for Destination with auth config."
+      },
+      "EmbeddingModel": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "short_name": {
+            "type": "string",
+            "title": "Short Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "model_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Name"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "auth_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "auth_config_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auth Config Class"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "short_name",
+          "provider",
+          "id",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "EmbeddingModel",
+        "description": "Schema for EmbeddingModel."
+      },
+      "EmbeddingModelWithConfigFields": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "short_name": {
+            "type": "string",
+            "title": "Short Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "model_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Name"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "auth_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "auth_config_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auth Config Class"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          },
+          "config_fields": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Fields"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "short_name",
+          "provider",
+          "id",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "EmbeddingModelWithConfigFields",
+        "description": "Schema for EmbeddingModel with auth config."
+      },
+      "Fields": {
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigField"
+            },
+            "type": "array",
+            "title": "Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fields"
+        ],
+        "title": "Fields",
+        "description": "Fields model."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "IntegrationType": {
+        "type": "string",
+        "enum": [
+          "source",
+          "destination",
+          "embedding_model"
+        ],
+        "title": "IntegrationType",
+        "description": "Integration type enum."
+      },
+      "Source": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "auth_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "auth_config_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auth Config Class"
+          },
+          "short_name": {
+            "type": "string",
+            "title": "Short Name"
+          },
+          "class_name": {
+            "type": "string",
+            "title": "Class Name"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "short_name",
+          "class_name",
+          "id",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "Source",
+        "description": "Schema for Source."
+      },
+      "Sync": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "source_connection_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Connection Id"
+          },
+          "destination_connection_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destination Connection Id"
+          },
+          "embedding_model_connection_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Model Connection Id"
+          },
+          "cron_schedule": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cron Schedule"
+          },
+          "white_label_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "White Label Id"
+          },
+          "white_label_user_identifier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "White Label User Identifier"
+          },
+          "sync_metadata": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sync Metadata"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          },
+          "created_by_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Created By Email"
+          },
+          "modified_by_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Modified By Email"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "source_connection_id",
+          "id",
+          "organization_id",
+          "created_at",
+          "modified_at",
+          "created_by_email",
+          "modified_by_email",
+          "status"
+        ],
+        "title": "Sync",
+        "description": "Schema for Sync."
+      },
+      "SyncCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "source_connection_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Connection Id"
+          },
+          "destination_connection_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destination Connection Id"
+          },
+          "embedding_model_connection_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Model Connection Id"
+          },
+          "cron_schedule": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cron Schedule"
+          },
+          "white_label_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "White Label Id"
+          },
+          "white_label_user_identifier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "White Label User Identifier"
+          },
+          "sync_metadata": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sync Metadata"
+          },
+          "run_immediately": {
+            "type": "boolean",
+            "title": "Run Immediately",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "source_connection_id"
+        ],
+        "title": "SyncCreate",
+        "description": "Schema for creating a Sync object."
+      },
+      "SyncJob": {
+        "properties": {
+          "sync_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Sync Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncJobStatus",
+            "default": "pending"
+          },
+          "chunks_detected": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunks Detected",
+            "default": 0
+          },
+          "chunks_inserted": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunks Inserted",
+            "default": 0
+          },
+          "chunks_deleted": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunks Deleted",
+            "default": 0
+          },
+          "chunks_skipped": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunks Skipped",
+            "default": 0
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "created_by_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Created By Email"
+          },
+          "modified_by_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Modified By Email"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "failed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sync_id",
+          "id",
+          "organization_id",
+          "created_by_email",
+          "modified_by_email",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "SyncJob",
+        "description": "Schema for SyncJob."
+      },
+      "SyncJobStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "in_progress",
+          "completed",
+          "failed"
+        ],
+        "title": "SyncJobStatus",
+        "description": "Sync job status enum."
+      },
+      "SyncStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "inactive",
+          "error"
+        ],
+        "title": "SyncStatus",
+        "description": "Sync status enum."
+      },
+      "User": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name",
+            "default": "Superuser"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "permissions": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Permissions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "organization_id",
+          "id"
+        ],
+        "title": "User",
+        "description": "Schema for User."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WhiteLabel": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Id"
+          },
+          "redirect_url": {
+            "type": "string",
+            "title": "Redirect Url"
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "type": "string",
+            "title": "Client Secret"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Organization Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Modified At"
+          },
+          "created_by_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Created By Email"
+          },
+          "modified_by_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Modified By Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "source_id",
+          "redirect_url",
+          "client_id",
+          "client_secret",
+          "id",
+          "organization_id",
+          "created_at",
+          "modified_at",
+          "created_by_email",
+          "modified_by_email"
+        ],
+        "title": "WhiteLabel",
+        "description": "Schema for WhiteLabel."
+      },
+      "WhiteLabelCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Id"
+          },
+          "redirect_url": {
+            "type": "string",
+            "title": "Redirect Url"
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "type": "string",
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "source_id",
+          "redirect_url",
+          "client_id",
+          "client_secret"
+        ],
+        "title": "WhiteLabelCreate",
+        "description": "Schema for creating a WhiteLabel object."
+      },
+      "WhiteLabelUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "redirect_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Redirect Url"
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "title": "WhiteLabelUpdate",
+        "description": "Schema for updating a WhiteLabel object."
       }
     }
   }
